@@ -1,48 +1,33 @@
 import tkinter as tk
 from tkinter import messagebox
+from ui.homepage import HomePage
 
-# 帳號類別
-class Account:
-    def __init__(self, username, password):
-        self.username = username
-        self.password = password
-
-    def verify_password(self, password):
-        return self.password == password
-
-# 登入視窗
 class LoginWindow:
     def __init__(self, master, accounts):
         self.master = master
         self.accounts = accounts
         self.master.title("登入系統")
-
-        # 最大化視窗
         self.master.state("zoomed")
 
-        # 配置 grid 行列權重，讓內容置中
+        # grid 配置
         self.master.grid_rowconfigure(0, weight=1)
         self.master.grid_rowconfigure(2, weight=1)
         self.master.grid_columnconfigure(0, weight=1)
         self.master.grid_columnconfigure(2, weight=1)
 
-        # 內容框架放在正中間
+        # 中間框架
         frame = tk.Frame(master)
         frame.grid(row=1, column=1)
 
-        # 帳號
         tk.Label(frame, text="帳號:", font=("Arial", 14)).grid(row=0, column=0, pady=10, padx=10)
         self.username_entry = tk.Entry(frame, font=("Arial", 14))
         self.username_entry.grid(row=0, column=1, pady=10, padx=10)
 
-        # 密碼
         tk.Label(frame, text="密碼:", font=("Arial", 14)).grid(row=1, column=0, pady=10, padx=10)
         self.password_entry = tk.Entry(frame, show="*", font=("Arial", 14))
         self.password_entry.grid(row=1, column=1, pady=10, padx=10)
 
-        # 登入按鈕
-        login_button = tk.Button(frame, text="登入", font=("Arial", 14), command=self.login)
-        login_button.grid(row=2, column=0, columnspan=2, pady=20)
+        tk.Button(frame, text="登入", font=("Arial", 14), command=self.login).grid(row=2, column=0, columnspan=2, pady=20)
 
     def login(self):
         username = self.username_entry.get()
@@ -59,7 +44,6 @@ class LoginWindow:
             messagebox.showerror("錯誤", "帳號不存在")
 
     def show_success(self):
-        # 彈出「登入成功」對話框
         success_window = tk.Toplevel(self.master)
         success_window.title("登入成功")
 
@@ -74,22 +58,6 @@ class LoginWindow:
                   command=lambda: [success_window.destroy(), self.open_homepage()]).pack(pady=10)
 
     def open_homepage(self):
-        self.master.withdraw()  # 隱藏登入視窗
+        self.master.withdraw()
         homepage = tk.Toplevel(self.master)
-        homepage.title("首頁")
-        homepage.state("zoomed")
-
-        homepage.grid_rowconfigure(0, weight=1)
-        homepage.grid_columnconfigure(0, weight=1)
-
-        tk.Label(homepage, text="歡迎來到首頁！", font=("Arial", 24)).grid(row=0, column=0, sticky="nsew")
-
-# 測試用帳號
-accounts = [
-    Account("user01", "123456"),
-]
-
-if __name__ == "__main__":
-    root = tk.Tk()
-    app = LoginWindow(root, accounts)
-    root.mainloop()
+        HomePage(homepage)
