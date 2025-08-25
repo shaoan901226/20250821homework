@@ -58,7 +58,7 @@ Given 系統中沒有帳號 ghost99
 When 使用者輸入帳號 ghost99，密碼 anypass 並點擊登入
 Then 系統顯示「帳號不存在」
 
-＃　實例化需求（用 Given / When / Then 格式）
+# 實例化需求（用 Given / When / Then 格式）
 
 
 案例 1：成功創建帳號
