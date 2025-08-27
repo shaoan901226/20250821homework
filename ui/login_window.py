@@ -6,7 +6,7 @@ class LoginWindow:
     def __init__(self, master, account_model):
         self.master = master
         self.master.title("登入系統")
-        self.master.state("zoomed")
+        self.master.state("zoomed")  # 最大化
         self.account_model = account_model
 
         self.frame = tk.Frame(master)
@@ -20,7 +20,9 @@ class LoginWindow:
         self.password_entry = tk.Entry(self.frame, show="*")
         self.password_entry.grid(row=1, column=1, pady=5)
 
+        # 登入按鈕
         tk.Button(self.frame, text="登入", command=self.login).grid(row=2, column=0, columnspan=2, pady=10)
+        # 創建新帳號按鈕
         tk.Button(self.frame, text="創建新帳號", command=self.open_create_account).grid(row=3, column=0, columnspan=2, pady=10)
 
     def login(self):
@@ -35,6 +37,11 @@ class LoginWindow:
     def open_create_account(self):
         create_win = tk.Toplevel(self.master)
         create_win.title("創建帳號")
+        create_win.state("zoomed")  # 最大化
+
+        frame = tk.Frame(create_win)
+        frame.place(relx=0.5, rely=0.5, anchor="center")  # 內容置中
+
         window_width, window_height = 350, 200
         x = (self.master.winfo_screenwidth() // 2) - (window_width // 2)
         y = (self.master.winfo_screenheight() // 2) - (window_height // 2)
@@ -63,7 +70,7 @@ class LoginWindow:
 
         tk.Button(frame, text="確定", font=("Arial", 12), width=10, command=create_account_action)\
             .grid(row=2, column=0, columnspan=2, pady=20, padx=10)
-        
+
     def show_success(self):
         success_window = tk.Toplevel(self.master)
         success_window.title("登入成功")
@@ -74,8 +81,8 @@ class LoginWindow:
         tk.Label(success_window, text="登入成功！", font=("Arial", 16)).pack(pady=20)
         tk.Button(success_window, text="確定", font=("Arial", 14),
                   command=lambda: [success_window.destroy(), self.open_homepage()]).pack(pady=10)
-
+        
     def open_homepage(self):
         self.master.withdraw()
         homepage = tk.Toplevel(self.master)
-        HomePage(homepage)
+        HomePage(homepage, self.account_model, self.username_entry.get())

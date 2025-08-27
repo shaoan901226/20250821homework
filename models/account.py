@@ -50,3 +50,10 @@ class AccountModel:
         if self.accounts[username].password != password:
             return False, "密碼錯誤"
         return True, "登入成功"
+    
+    def delete_account(self, username):
+        if username not in self.accounts:
+            return False, "帳號不存在"
+        del self.accounts[username]
+        self.save_accounts()
+        return True, "帳號已刪除"
