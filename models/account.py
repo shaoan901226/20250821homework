@@ -1,59 +1,70 @@
-import json
-import os
+import mysql.connector
+import hashlib
 
 class Account:
     def __init__(self, username, password):
         self.username = username
         self.password = password
 
-    def to_dict(self):
-        return {"username": self.username, "password": self.password}
-
-    @staticmethod
-    def from_dict(data):
-        return Account(data["username"], data["password"])
-
 class AccountModel:
-    def __init__(self, filepath="accounts.json"):
-        self.filepath = filepath
-        self.accounts = self.load_accounts()
+    def __init__(self, host="localhost", user="root", password="", database="userdb"):
+        self.conn = mysql.connector.connect(
+            host=host,
+            user=user,
+            password=password,
+            database=database
+        )
+        self.create_table()
 
-    def load_accounts(self):
-        print(f"嘗試讀取帳號從 {self.filepath}")
-        if not os.path.exists(self.filepath):
-            print("找不到帳號檔案")
-            return {}
-        with open(self.filepath, "r", encoding="utf-8") as f:
-            data = json.load(f)
-            print("讀取到帳號：", data)
-            return {u: Account.from_dict(acc) for u, acc in data.items()}
+    def create_table(self):
+        cursor = self.conn.cursor()
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS account (
+                idAccount INT AUTO_INCREMENT PRIMARY KEY,
+                username VARCHAR(255) UNIQUE NOT NULL,
+                password VARCHAR(255) NOT NULL
+            )
+        """)
+        self.conn.commit()
 
-    def save_accounts(self):
-        print(f"儲存帳號到 {self.filepath}")
-        with open(self.filepath, "w", encoding="utf-8") as f:
-            data = {u: acc.to_dict() for u, acc in self.accounts.items()}
-            print("要儲存的帳號：", data)
-            json.dump(data, f, ensure_ascii=False, indent=2)
+    def hash_password(self, password):
+        return hashlib.sha256(password.encode("utf-8")).hexdigest()
 
     def create_account(self, username, password):
         if not username:
             return False, "使用者名稱不得為空白"
-        if username in self.accounts:
+        if self.get_account(username):
             return False, "帳號已存在"
-        self.accounts[username] = Account(username, password)
-        self.save_accounts()
-        return True, "成功創建帳號"
+        hashed_pw = self.hash_password(password)
+        try:
+            cursor = self.conn.cursor()
+            cursor.execute("INSERT INTO account (username, password) VALUES (%s, %s)", (username, hashed_pw))
+            self.conn.commit()
+            return True, "成功創建帳號"
+        except Exception as e:
+            return False, f"資料庫錯誤: {e}"
 
     def validate_login(self, username, password):
-        if username not in self.accounts:
+        acc = self.get_account(username)
+        if not acc:
             return False, "帳號不存在"
-        if self.accounts[username].password != password:
+        hashed_pw = self.hash_password(password)
+        if acc.password != hashed_pw:
             return False, "密碼錯誤"
         return True, "登入成功"
-    
+
     def delete_account(self, username):
-        if username not in self.accounts:
+        if not self.get_account(username):
             return False, "帳號不存在"
-        del self.accounts[username]
-        self.save_accounts()
+        cursor = self.conn.cursor()
+        cursor.execute("DELETE FROM account WHERE username = %s", (username,))
+        self.conn.commit()
         return True, "帳號已刪除"
+
+    def get_account(self, username):
+        cursor = self.conn.cursor()
+        cursor.execute("SELECT username, password FROM account WHERE username = %s", (username,))
+        row = cursor.fetchone()
+        if row:
+            return Account(*row)
+        return None
