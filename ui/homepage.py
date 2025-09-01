@@ -1,10 +1,11 @@
 import tkinter as tk
 from tkinter import messagebox
+from Repository import AccountRepo  
 
 class HomePage:
-    def __init__(self, master, account_model, current_user):
+    def __init__(self, master, account_repo, current_user):
         self.master = master
-        self.account_model = account_model
+        self.account_repo = account_repo
         self.current_user = current_user
         self.master.title("首頁")
         self.master.state("zoomed")
@@ -20,7 +21,7 @@ class HomePage:
     def delete_account(self):
         confirm = messagebox.askyesno("確認", f"確定要刪除帳號「{self.current_user}」嗎？")
         if confirm:
-            success, msg = self.account_model.delete_account(self.current_user)
+            success, msg = self.account_repo.delete_account(self.current_user)
             if success:
                 messagebox.showinfo("成功", msg)
                 self.logout()

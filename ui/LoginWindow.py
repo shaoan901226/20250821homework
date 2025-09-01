@@ -1,5 +1,7 @@
 import tkinter as tk
 from tkinter import messagebox
+from Repository import AccountRepo
+from ui.HomePage import HomePage
 
 class LoginWindow:
     def __init__(self, master, account_repo):
@@ -27,45 +29,53 @@ class LoginWindow:
     def login(self):
         username = self.username_entry.get()
         password = self.password_entry.get()
-        success, msg = self.account_model.validate_login(username, password)
+        success, msg = self.account_repo.validate_login(username, password)
         if success:
             self.show_success()
         else:
             messagebox.showerror("錯誤", msg)
 
     def open_create_account(self):
-        create_win = tk.Toplevel(self.master)
-        create_win.title("創建帳號")
-        create_win.state("zoomed")  # 最大化
+        # 檢查視窗是否已經存在
+        if hasattr(self, "create_win") and self.create_win.winfo_exists():
+            self.create_win.lift()  # 把已存在的視窗帶到最前面
+            return
 
-        frame = tk.Frame(create_win)
-        frame.place(relx=0.5, rely=0.5, anchor="center")  # 內容置中
+        # 建立創建帳號視窗
+        self.create_win = tk.Toplevel(self.master)
+        self.create_win.title("創建帳號")
+        self.create_win.state("zoomed")
 
+        # 中間置中設定
         window_width, window_height = 350, 200
         x = (self.master.winfo_screenwidth() // 2) - (window_width // 2)
         y = (self.master.winfo_screenheight() // 2) - (window_height // 2)
-        create_win.geometry(f"{window_width}x{window_height}+{x}+{y}")
+        self.create_win.geometry(f"{window_width}x{window_height}+{x}+{y}")
 
-        frame = tk.Frame(create_win)
-        frame.pack(expand=True)
+        # 內容 Frame
+        frame = tk.Frame(self.create_win)
+        frame.place(relx=0.5, rely=0.5, anchor="center")
 
         tk.Label(frame, text="帳號:", font=("Arial", 12)).grid(row=0, column=0, pady=10, padx=10, sticky="e")
-        username_entry = tk.Entry(frame, font=("Arial", 12), justify="left")
+        username_entry = tk.Entry(frame, font=("Arial", 12))
         username_entry.grid(row=0, column=1, pady=10, padx=10)
 
         tk.Label(frame, text="密碼:", font=("Arial", 12)).grid(row=1, column=0, pady=10, padx=10, sticky="e")
-        password_entry = tk.Entry(frame, font=("Arial", 12), show="*", justify="left")
+        password_entry = tk.Entry(frame, font=("Arial", 12), show="*")
         password_entry.grid(row=1, column=1, pady=10, padx=10)
 
+        # 確定按鈕動作
         def create_account_action():
             username = username_entry.get().strip()
             password = password_entry.get()
-            success, msg = self.account_model.create_account(username, password)
+            success, msg = self.account_repo.create_account(username, password)
             if success:
                 messagebox.showinfo("成功", msg)
-                create_win.destroy()
+                self.create_win.destroy()  # 成功才關閉視窗
+                del self.create_win       # 移除屬性
             else:
                 messagebox.showerror("錯誤", msg)
+                username_entry.focus_set()  # 保持視窗開啟，聚焦帳號輸入框
 
         tk.Button(frame, text="確定", font=("Arial", 12), width=10, command=create_account_action)\
             .grid(row=2, column=0, columnspan=2, pady=20, padx=10)
@@ -80,8 +90,8 @@ class LoginWindow:
         tk.Label(success_window, text="登入成功！", font=("Arial", 16)).pack(pady=20)
         tk.Button(success_window, text="確定", font=("Arial", 14),
                   command=lambda: [success_window.destroy(), self.open_homepage()]).pack(pady=10)
-        
+
     def open_homepage(self):
         self.master.withdraw()
         homepage = tk.Toplevel(self.master)
-        HomePage(homepage, self.account_model, self.username_entry.get())
+        HomePage(homepage, self.account_repo, self.username_entry.get())
