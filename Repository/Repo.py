@@ -1,10 +1,6 @@
 import mysql.connector
 import hashlib
-
-class Account:
-    def __init__(self, username, password):
-        self.username = username
-        self.password = password
+from models.account import Account
 
 class AccountRepo:
     def __init__(self, host="localhost", user="root", password="", database="userdb"):
