@@ -1,6 +1,6 @@
 import mysql.connector
 import hashlib
-from models.account import Account
+from models.Account import Account
 
 class AccountRepo:
     def __init__(self, host="localhost", user="root", password="", database="userdb"):

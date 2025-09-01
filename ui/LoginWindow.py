@@ -1,13 +1,12 @@
 import tkinter as tk
 from tkinter import messagebox
-from ui.homepage import HomePage
 
 class LoginWindow:
-    def __init__(self, master, account_model):
+    def __init__(self, master, account_repo):
         self.master = master
         self.master.title("登入系統")
         self.master.state("zoomed")  # 最大化
-        self.account_model = account_model
+        self.account_repo = account_repo
 
         self.frame = tk.Frame(master)
         self.frame.place(relx=0.5, rely=0.5, anchor="center")
