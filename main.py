@@ -1,9 +1,11 @@
-import tkinter as tk
+from Repository.DatabaseConfig import DatabaseConfig
 from Repository.AccountRepo import AccountRepo
 from ui.LoginWindow import LoginWindow
+import tkinter as tk
 
-if __name__ == "__main__":
-    repo = AccountRepo(user="root", password="Ray880203==", database="userdb")
-    root = tk.Tk()
-    app = LoginWindow(root, repo)
-    root.mainloop()
+config = DatabaseConfig(user="root", password="Ray880203==", database="userdb")
+repo = AccountRepo(config)
+
+root = tk.Tk()
+app = LoginWindow(root, repo)
+root.mainloop()
